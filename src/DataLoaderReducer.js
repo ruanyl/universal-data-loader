@@ -5,7 +5,6 @@ import { DataLoader as DL } from './DataLoaderState'
 
 export const ActionTypes = keyMirror({
   DATA_LOADER: {
-    INITIALIZE: null,
     LOAD: null,
     LOAD_DATA_SUCCESS: null,
     LOAD_DATA_FAILURE: null,
@@ -38,13 +37,7 @@ export const loadFailure = (uniqueApiKey, error) => ({
   },
 })
 
-export const initialize = keys => ({
-  type: ActionTypes.DATA_LOADER.INITIALIZE,
-  value: keys,
-})
-
 export const dataLoaderReducer = createReducer(DL.create(), {
-  [ActionTypes.DATA_LOADER.INITIALIZE]: valueReducer(DL.initialize),
   [ActionTypes.DATA_LOADER.LOAD_DATA_REQUEST]: valueReducer(DL.loadStart),
   [ActionTypes.DATA_LOADER.LOAD_DATA_SUCCESS]: valueReducer(DL.loadSuccess),
   [ActionTypes.DATA_LOADER.LOAD_DATA_FAILURE]: valueReducer(DL.loadFailure),
