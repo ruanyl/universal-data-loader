@@ -2,31 +2,26 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { createStructuredSelector } from 'reselect'
 import React, { PureComponent, createElement } from 'react'
-import { values } from 'ramda'
+import { keys, zipObj } from 'ramda'
 
 import { DataLoader as DL } from './DataLoaderState'
 import { load } from './DataLoaderReducer'
 
-const withDispatch = (apis, dispatch) => {
-  const apisWithDispatch = {}
-  Object.keys(apis).forEach(key => {
-    apisWithDispatch[key] = { ...apis[key] }
-
-    if (apisWithDispatch[key].onSuccess) {
-      apisWithDispatch[key].onSuccess = apisWithDispatch[key].onSuccess(dispatch)
-    }
-    if (apis[key].onFailure) {
-      apisWithDispatch[key].onFailure = apisWithDispatch[key].onFailure(dispatch)
-    }
-  })
-  return apisWithDispatch
-}
+const withDispatch = (configs, dispatch) => configs.map(config => {
+  let configWithDispatch = { ...config }
+  if (configWithDispatch.onSuccess) {
+    configWithDispatch = { ...configWithDispatch, onSuccess: configWithDispatch.onSuccess(dispatch) }
+  }
+  if (configWithDispatch.onFailure) {
+    configWithDispatch = { ...configWithDispatch, onFailure: configWithDispatch.onFailure(dispatch) }
+  }
+  return configWithDispatch
+})
 
 /**
  * Usage:
  * const ComponentWithDataLoader = dataLoader({
- *   getCompanyTags: {
- *     uniqueApiKey: 'anUniqueName',
+ *   users: {
  *     apiCall: getCompanyTags, // the function which returns Promise
  *     cacheExpiresIn: 10000, // if cache expires, make the request again
  *     autoLoad: true, // start to load data when componentWillMount
@@ -44,7 +39,7 @@ const withDispatch = (apis, dispatch) => {
  * In the Component, you can do for example:
  *
  * onButtonClick = (params) => {
- *   this.props.load(apis.getCompanyTags, params)
+ *   this.props.load(apis.users, params)
  * }
  *
  * Props passed to Component
@@ -62,7 +57,9 @@ const withDispatch = (apis, dispatch) => {
  * }
  */
 export const dataLoader = (apis = {}) => {
-  const uniqueApiKeys = values(apis).map(api => api.uniqueApiKey)
+  const uniqueApiKeys = keys(apis)
+  const apiArrayWithKey = uniqueApiKeys.map(uniqueApiKey => ({ ...apis[uniqueApiKey], uniqueApiKey }))
+
   const mapStateToProps = createStructuredSelector({
     selectedDataStorage: DL.getDataStorageByKeys(uniqueApiKeys),
   })
@@ -85,14 +82,15 @@ export const dataLoader = (apis = {}) => {
 
       constructor(props) {
         super(props)
-        this.apisWithDispatch = withDispatch(apis, props.dispatch)
+        this.apisWithDispatch = withDispatch(apiArrayWithKey, props.dispatch)
+        this._apis = zipObj(uniqueApiKeys, this.apisWithDispatch)
         this.state = {
           loadedData: props.selectedDataStorage,
         }
       }
 
       componentWillMount() {
-        values(this.apisWithDispatch).forEach(api => {
+        this.apisWithDispatch.forEach(api => {
           if (api.autoLoad === true) {
             this.props.load(api)
           }
@@ -109,7 +107,7 @@ export const dataLoader = (apis = {}) => {
         return (
           <WrappedComponent
             {...this.props.passedProps}
-            apis={this.apisWithDispatch}
+            apis={this._apis}
             loadedData={this.state.loadedData}
             load={this.props.load}
           />
