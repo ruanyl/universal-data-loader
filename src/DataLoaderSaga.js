@@ -1,25 +1,40 @@
-import { put, call, select, takeEvery } from 'redux-saga/effects'
+import { delay } from 'redux-saga'
+import { put, call, select, takeEvery, fork, cancel } from 'redux-saga/effects'
+import { identity } from 'ramda'
 
 import { ActionTypes as AT, loadSuccess, loadFailure } from './DataLoaderReducer'
 import { DataLoader as DL } from './DataLoaderState'
 
-function* load(api, params) {
+function* load(action) {
+  const { api, params } = action.value
   const cachedData = yield select(DL.getDataStorageValue(api.uniqueApiKey))
   const cacheExpiresIn = api.cacheExpiresIn ? api.cacheExpiresIn : 0
   if (cachedData && (Date.now() - cachedData.lastUpdateTime) < cacheExpiresIn) {
-    return cachedData
+    return
   }
-  const data = yield call(fetchData, api, params)
-  return data
+  if (api.interval) {
+    yield call(runInInterval, fetchData, { api, params }, api.interval, api.shouldStopInterval)
+  } else {
+    yield call(fetchData, { api, params })
+  }
 }
 
-function* loadData(action) {
-  const { api, params } = action.value
-  yield call(load, api, params)
+function* runInInterval(func, args, interval, shouldStopInterval = identity) {
+  const task = yield fork(func, args)
+  yield call(delay, interval)
+
+  // cancel task if task is still running after interval
+  if (task.isRunning()) {
+    yield cancel(task)
+  }
+
+  if (!shouldStopInterval(task.result())) {
+    yield call(runInInterval, func, args, interval, shouldStopInterval)
+  }
 }
 
 /* eslint-disable complexity */
-function* fetchData(api, params) {
+function* fetchData({ api, params }) {
   const data = yield call(api.apiCall, params)
 
   if (data.error) {
@@ -39,6 +54,6 @@ function* fetchData(api, params) {
 
 export function* dataLoaderSagas() {
   yield [
-    takeEvery(AT.DATA_LOADER.LOAD, loadData),
+    takeEvery(AT.DATA_LOADER.LOAD, load),
   ]
 }
