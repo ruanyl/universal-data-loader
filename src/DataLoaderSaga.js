@@ -35,20 +35,20 @@ function* runInInterval(func, args, interval, shouldStopInterval = identity) {
 
 /* eslint-disable complexity */
 function* fetchData({ api, params }) {
-  const data = yield call(api.apiCall, params)
+  try {
+    const data = yield call(api.apiCall, params)
+    yield put(loadSuccess(api.uniqueApiKey, data))
 
-  if (data.error) {
-    yield put(loadFailure(api.uniqueApiKey, data.error))
+    if (api.onSuccess) {
+      yield call(api.onSuccess, data)
+    }
+  } catch (e) {
+    yield put(loadFailure(api.uniqueApiKey, e))
+
     if (api.onFailure) {
-      yield call(api.onFailure, data.error)
+      yield call(api.onFailure, e)
     }
     return
-  }
-
-  yield put(loadSuccess(api.uniqueApiKey, data))
-
-  if (api.onSuccess) {
-    yield call(api.onSuccess, data)
   }
 }
 

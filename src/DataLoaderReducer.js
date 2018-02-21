@@ -38,7 +38,7 @@ export const loadFailure = (uniqueApiKey, error) => ({
 })
 
 export const dataLoaderReducer = createReducer(DL.create(), {
-  [ActionTypes.DATA_LOADER.LOAD_DATA_REQUEST]: valueReducer(DL.loadStart),
+  [ActionTypes.DATA_LOADER.LOAD]: valueReducer(DL.loadStart),
   [ActionTypes.DATA_LOADER.LOAD_DATA_SUCCESS]: valueReducer(DL.loadSuccess),
   [ActionTypes.DATA_LOADER.LOAD_DATA_FAILURE]: valueReducer(DL.loadFailure),
 })

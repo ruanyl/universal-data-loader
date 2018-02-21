@@ -18,7 +18,7 @@ DL.getDataStorageByKeys = keys => state => {
   return dataStorages
 }
 
-DL.loadStart = ({ uniqueApiKey }) => s => {
+DL.loadStart = ({ api: { uniqueApiKey } }) => s => {
   let dataStorage = DL.getDataStorageValue(uniqueApiKey)(s)
   if (!dataStorage) {
     dataStorage = {
