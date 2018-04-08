@@ -54,6 +54,6 @@ function* fetchData({ api, params }) {
 
 export function* dataLoaderSagas() {
   yield [
-    takeEvery(AT.DATA_LOADER.LOAD, load),
+    takeEvery(AT.DATA_LOADER.LOAD_START, load),
   ]
 }

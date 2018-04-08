@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { createStructuredSelector } from 'reselect'
-import React, { PureComponent, createElement } from 'react'
-import { keys, zipObj } from 'ramda'
+import { createSelector } from 'reselect'
+import React, { PureComponent } from 'react'
+import { keys, zipObj, identity } from 'ramda'
 
 import { DataLoader as DL } from './DataLoaderState'
-import { load } from './DataLoaderReducer'
+import { load, init } from './DataLoaderReducer'
 
 const withDispatch = (configs, dispatch) => configs.map(config => {
   let configWithDispatch = { ...config }
@@ -60,15 +60,15 @@ export const dataLoader = (apis = {}) => {
   const uniqueApiKeys = keys(apis)
   const apiArrayWithKey = uniqueApiKeys.map(uniqueApiKey => ({ ...apis[uniqueApiKey], uniqueApiKey }))
 
-  const mapStateToProps = createStructuredSelector({
-    selectedDataStorage: DL.getDataStorageByKeys(uniqueApiKeys),
-  })
-
-  const connector = connect(mapStateToProps, dispatch => {
-    const boundActionCreators = bindActionCreators({ load }, dispatch)
+  const mapStateToProps = createSelector(DL.getDataStorageByKeys(uniqueApiKeys), identity)
+  const mapDispatchToProps = dispatch => {
+    const boundActionCreators = bindActionCreators({ load, init }, dispatch)
     const allActionProps = { ...boundActionCreators, dispatch }
     return allActionProps
-  })
+  }
+  const mergeProps = (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, passedProps: ownProps })
+
+  const connector = connect(mapStateToProps, mapDispatchToProps, mergeProps)
 
   return WrappedComponent => {
     class DataLoaderComponent extends PureComponent {
@@ -78,18 +78,17 @@ export const dataLoader = (apis = {}) => {
         load: React.PropTypes.func,
         passedProps: React.PropTypes.object,
         selectedDataStorage: React.PropTypes.object,
+        init: React.PropTypes.func,
       }
 
       constructor(props) {
         super(props)
         this.apisWithDispatch = withDispatch(apiArrayWithKey, props.dispatch)
         this._apis = zipObj(uniqueApiKeys, this.apisWithDispatch)
-        this.state = {
-          loadedData: props.selectedDataStorage,
-        }
       }
 
       componentWillMount() {
+        uniqueApiKeys.forEach(key => this.props.init(key))
         this.apisWithDispatch.forEach(api => {
           if (api.autoLoad === true) {
             this.props.load(api)
@@ -97,18 +96,12 @@ export const dataLoader = (apis = {}) => {
         })
       }
 
-      componentWillReceiveProps(nextProps) {
-        if (Object.keys(nextProps.selectedDataStorage).some(k => nextProps.selectedDataStorage[k] !== this.props.selectedDataStorage[k])) {
-          this.setState({ loadedData: nextProps.selectedDataStorage })
-        }
-      }
-
       render() {
         return (
           <WrappedComponent
             {...this.props.passedProps}
+            {...this.props.selectedDataStorage}
             apis={this._apis}
-            loadedData={this.state.loadedData}
             load={this.props.load}
           />
         )
@@ -117,11 +110,6 @@ export const dataLoader = (apis = {}) => {
 
     DataLoaderComponent.WrappedComponent = WrappedComponent
 
-    const ConnectedDataLoader = connector(DataLoaderComponent)
-
-    return ({ ...props }) => createElement(ConnectedDataLoader, {
-      ...props,
-      passedProps: props,
-    })
+    return connector(DataLoaderComponent)
   }
 }
