@@ -1,10 +1,3 @@
-## React Data Loader
--------------
-Handle the data loading of your application
+## TypeScript React Starter ![travis](https://travis-ci.org/ruanyl/react-boilerplate-ts.svg?branch=master)
 
-### README
-
-### Example
-
-## License
-MIT
+write React Component with TypeScript and publish to NPM
