@@ -14,6 +14,13 @@ export interface FailurePayload {
   lastErrorTime: number;
 }
 
+export const getDataStorageValue = (key: string) => (state: Dict) => {
+  if (state) {
+    return state[key]
+  }
+  return undefined
+}
+
 export const getDataStorageByKeys = (keys: string[]) => (state: Dict) => {
   const dataStorages: Dict = {}
   keys.forEach(key => {
