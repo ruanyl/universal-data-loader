@@ -12,6 +12,10 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.1.10",
+    "@types/jest": "^22.2.3",
+    "@types/react": "^16.1.0",
+    "@types/react-dom": "^16.0.5",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.0.5",
     "express": "^4.16.3",
@@ -28,11 +32,7 @@
     "webpack-dev-middleware": "^3.1.2"
   },
   "dependencies": {
-    "@types/enzyme": "^3.1.10",
-    "@types/jest": "^22.2.3",
-    "@types/react": "^16.1.0",
-    "@types/react-dom": "^16.0.5",
-    "reducer-tools": "^0.1.0"
+    "reducer-tools": "^0.2.1"
   },
   "peerDependencies": {
     "react": ">= 0.14.0",

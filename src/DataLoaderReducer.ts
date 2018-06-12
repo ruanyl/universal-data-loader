@@ -2,6 +2,14 @@ import { createReducer, valueReducer } from 'reducer-tools'
 
 import * as DL from './DataLoaderState'
 
+export interface Action {
+  type: string;
+  value?: any;
+  meta?: any;
+}
+
+export type DataLoaderReducer = (s: any, a: Action) => any
+
 export const init = (key: string) => ({
   type: '@@DATA_LOADER/INIT',
   value: key,
@@ -36,7 +44,7 @@ export const loadFailure = (key: string, error: Error) => ({
   },
 })
 
-export const dataLoaderReducer = createReducer({}, {
+export const dataLoaderReducer: DataLoaderReducer = createReducer({}, {
   '@@DATA_LOADER/INIT': valueReducer(DL.init),
   '@@DATA_LOADER/LOAD_START': valueReducer(DL.loadStart),
   '@@DATA_LOADER/LOAD_DATA_SUCCESS': valueReducer(DL.loadSuccess),
