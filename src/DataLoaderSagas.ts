@@ -8,11 +8,6 @@ type IntervalFunction = (name: string, meta: Meta) => any
 
 function* load(action: LoadAction) {
   const { value, meta } = action
-  const cachedData = yield select(DL.getDataStorageValue(value))
-  const cacheExpiresIn = meta.cacheExpiresIn ? meta.cacheExpiresIn : 0
-  if (cachedData && (Date.now() - cachedData.lastUpdateTime) < cacheExpiresIn) {
-    return
-  }
   if (meta.interval) {
     yield call(runInInterval, fetchData, value, meta)
   } else {
@@ -35,7 +30,13 @@ function* runInInterval(func: IntervalFunction, name: string, meta: Meta): any {
 }
 
 function* fetchData(name: string, meta: Meta) {
-  let data
+  let data = yield select(DL.getDataStorageValue(name))
+  const cacheExpiresIn = meta.cacheExpiresIn ? meta.cacheExpiresIn : 0
+
+  if (data && (Date.now() - data.lastUpdateTime) < cacheExpiresIn) {
+    return data
+  }
+
   try {
     yield put(loadStart(name))
     data = yield call(meta.apiCall, meta.params)

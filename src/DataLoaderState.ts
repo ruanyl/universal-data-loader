@@ -26,9 +26,11 @@ export interface State {
   [key: string]: LoaderStatus;
 }
 
+export const DATA_LOADER_NAMESPACE = '@@dataloader'
+
 export const getDataStorageValue = (key: string) => (state: Dict) => {
-  if (state) {
-    return state[key]
+  if (state && state[DATA_LOADER_NAMESPACE]) {
+    return state[DATA_LOADER_NAMESPACE][key]
   }
   return undefined
 }
@@ -36,12 +38,12 @@ export const getDataStorageValue = (key: string) => (state: Dict) => {
 export const getDataStorageByKeys = (keys: string[]) => (state: Dict) => {
   const dataStorages: Dict = {}
   keys.forEach(key => {
-    dataStorages[key] = state[key]
+    dataStorages[key] = state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][key]
   })
   return dataStorages
 }
 
-export const init = (key: string) => (state: Dict) => {
+export const initialized = (key: string) => (state: Dict) => {
   let dataStorage = state[key]
   if (!dataStorage) {
     dataStorage = {
@@ -53,7 +55,7 @@ export const init = (key: string) => (state: Dict) => {
   return { ...state, [key]: dataStorage }
 }
 
-export const loadStart = (key: string) => (state: Dict) => {
+export const started = (key: string) => (state: Dict) => {
   let dataStorage = state[key]
   if (!dataStorage) {
     dataStorage = {
@@ -67,7 +69,7 @@ export const loadStart = (key: string) => (state: Dict) => {
   return { ...state, [key]: dataStorage }
 }
 
-export const loadSuccess = (payload: SuccessPayload) => (state: Dict) => {
+export const succeed = (payload: SuccessPayload) => (state: Dict) => {
   let dataStorage = state[payload.key]
   if (dataStorage) {
     dataStorage = {
@@ -82,7 +84,7 @@ export const loadSuccess = (payload: SuccessPayload) => (state: Dict) => {
   return state
 }
 
-export const loadFailure = (payload: FailurePayload) => (state: Dict) => {
+export const failed = (payload: FailurePayload) => (state: Dict) => {
   let dataStorage = state[payload.key]
   if (dataStorage) {
     dataStorage = {

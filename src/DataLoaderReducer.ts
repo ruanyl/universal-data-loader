@@ -61,8 +61,8 @@ export const loadFailure = (key: string, error: Error) => ({
 })
 
 export const dataLoaderReducer: DataLoaderReducer = createReducer({}, {
-  '@@DATA_LOADER/INIT': valueReducer(DL.init),
-  '@@DATA_LOADER/LOAD_START': valueReducer(DL.loadStart),
-  '@@DATA_LOADER/LOAD_DATA_SUCCESS': valueReducer(DL.loadSuccess),
-  '@@DATA_LOADER/LOAD_DATA_FAILURE': valueReducer(DL.loadFailure),
+  '@@DATA_LOADER/INIT': valueReducer(DL.initialized),
+  '@@DATA_LOADER/LOAD_START': valueReducer(DL.started),
+  '@@DATA_LOADER/LOAD_DATA_SUCCESS': valueReducer(DL.succeed),
+  '@@DATA_LOADER/LOAD_DATA_FAILURE': valueReducer(DL.failed),
 })

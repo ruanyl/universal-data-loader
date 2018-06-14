@@ -2,18 +2,20 @@ import { connect } from 'react-redux'
 import { AnyAction } from 'redux'
 import * as React from 'react'
 
-import { LoaderStatus, State } from './DataLoaderState'
+import { LoaderStatus, State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
 import { load, init, Meta } from './DataLoaderReducer'
-
-export const DATA_LOADER = '@@dataloader'
 
 interface Store {
   [key: string]: State;
 }
 
+export interface Loader<TData = any> extends LoaderStatus<TData> {
+  load: Function;
+}
+
 export interface OwnProps<TData = any, TParams = any> extends Meta<TData, TParams> {
   name: string;
-  children: (loaderStatus: LoaderStatus<TData>) => React.ReactNode;
+  children: (loaderStatus: Loader<TData>) => React.ReactNode;
 }
 
 export interface StateProps<TData = any> {
@@ -43,15 +45,16 @@ class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponen
   }
 
   render() {
+    const { name, load, ...meta } = this.props
     if (this.props.loaderStatus) {
-      return this.props.children(this.props.loaderStatus)
+      return this.props.children({ ...this.props.loaderStatus, load: () =>  load(name, meta) })
     }
     return null
   }
 }
 
 const mapStateToProps = (state: Store, ownProps: OwnProps) => ({
-  loaderStatus: state[DATA_LOADER] && state[DATA_LOADER][ownProps.name]
+  loaderStatus: state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][ownProps.name]
 })
 
 export const DataLoader = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, { load, init })(DataLoaderComponent)

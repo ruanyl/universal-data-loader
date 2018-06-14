@@ -6,7 +6,7 @@ import { Provider } from 'react-redux'
 import { createLogger } from 'redux-logger'
 
 import { dataLoaderSagas } from '../src/DataLoaderSagas'
-import { DATA_LOADER } from '../src/DataLoader'
+import { DATA_LOADER_NAMESPACE } from '../src/DataLoaderState'
 import { dataLoaderReducer } from '../src/DataLoaderReducer'
 import { App } from './App'
 
@@ -26,7 +26,7 @@ export const configureStore = (reducers: Reducer, sagas: any, preloadedState: an
 }
 
 const reducers = combineReducers({
-  [DATA_LOADER]: dataLoaderReducer,
+  [DATA_LOADER_NAMESPACE]: dataLoaderReducer,
 })
 
 const store = configureStore(reducers, dataLoaderSagas)
