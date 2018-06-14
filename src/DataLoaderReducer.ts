@@ -11,7 +11,7 @@ export interface Action {
 export type DataLoaderReducer = (s: any, a: Action) => any
 
 export interface Meta<TData = any, TParams = any> {
-  apiCall?: (params?: TParams) => Promise<any>;
+  apiCall: (params?: TParams) => Promise<any>;
   cacheExpiresIn?: number;
   autoLoad?: boolean;
   onSuccess?: (data: TData) => any;

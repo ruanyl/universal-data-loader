@@ -11,16 +11,16 @@ interface Store {
   [key: string]: State;
 }
 
-interface OwnProps<TData = any, TParams = any> extends Meta<TData, TParams> {
+export interface OwnProps<TData = any, TParams = any> extends Meta<TData, TParams> {
   name: string;
   children: (loaderStatus: LoaderStatus<TData>) => React.ReactNode;
 }
 
-interface StateProps<TData = any> {
+export interface StateProps<TData = any> {
   loaderStatus: LoaderStatus<TData>;
 }
 
-interface DispatchProps<TData = any, TParams = any> {
+export interface DispatchProps<TData = any, TParams = any> {
   load: (name: string, meta: Meta<TData, TParams>) => AnyAction;
   init: (name: string) => AnyAction;
 }
