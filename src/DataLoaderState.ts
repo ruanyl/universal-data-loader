@@ -14,6 +14,18 @@ export interface FailurePayload {
   lastErrorTime: number;
 }
 
+export interface LoaderStatus<TData = any> {
+  data: TData;
+  loading: boolean;
+  error: Error;
+  lastUpdateTime: number | undefined;
+  lastErrorTime: number | undefined;
+}
+
+export interface State {
+  [key: string]: LoaderStatus;
+}
+
 export const getDataStorageValue = (key: string) => (state: Dict) => {
   if (state) {
     return state[key]

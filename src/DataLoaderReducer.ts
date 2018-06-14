@@ -10,12 +10,28 @@ export interface Action {
 
 export type DataLoaderReducer = (s: any, a: Action) => any
 
+export interface Meta<TData = any, TParams = any> {
+  apiCall?: (params?: TParams) => Promise<any>;
+  cacheExpiresIn?: number;
+  autoLoad?: boolean;
+  onSuccess?: (data: TData) => any;
+  onFailure?: (error: Error) => any;
+  interval?: number;
+  shouldInterval?: (data: TData) => boolean;
+  params?: TParams;
+}
+
+export interface LoadAction extends Action {
+  value: string;
+  meta: Meta;
+}
+
 export const init = (key: string) => ({
   type: '@@DATA_LOADER/INIT',
   value: key,
 })
 
-export const load = (key: string, meta: any) => ({
+export const load = (key: string, meta: Meta) => ({
   type: '@@DATA_LOADER/LOAD',
   value: key,
   meta,

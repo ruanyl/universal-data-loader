@@ -1,30 +1,10 @@
-import { Dispatch } from 'redux'
 import { delay, Task } from 'redux-saga'
 import { put, call, select, takeEvery, fork, cancel, all } from 'redux-saga/effects'
 
-import { loadSuccess, loadFailure } from './DataLoaderReducer'
+import { loadSuccess, loadFailure, Meta, LoadAction, loadStart } from './DataLoaderReducer'
 import * as DL from './DataLoaderState'
-import { Action } from './DataLoaderReducer'
 
 type IntervalFunction = (name: string, meta: Meta) => any
-
-interface LoaderConfig {
-  apiCall: (params: any) => Promise<any>;
-  cacheExpiresIn?: number;
-  autoLoad?: boolean;
-  onSuccess?: (dispatch: Dispatch) => (data: any) => any;
-  onFailure?: (dispatch: Dispatch) => (error: Error) => any;
-  interval?: number;
-  shouldInterval?: (result: any) => boolean;
-  params?: any;
-}
-
-type Meta = LoaderConfig
-
-interface LoadAction extends Action {
-  value: string;
-  meta: Meta;
-}
 
 function* load(action: LoadAction) {
   const { value, meta } = action
@@ -55,8 +35,10 @@ function* runInInterval(func: IntervalFunction, name: string, meta: Meta): any {
 }
 
 function* fetchData(name: string, meta: Meta) {
+  let data
   try {
-    const data = yield call(meta.apiCall, meta.params)
+    yield put(loadStart(name))
+    data = yield call(meta.apiCall, meta.params)
     yield put(loadSuccess(name, data))
 
     if (meta.onSuccess) {
@@ -68,8 +50,8 @@ function* fetchData(name: string, meta: Meta) {
     if (meta.onFailure) {
       yield call(meta.onFailure, e)
     }
-    return
   }
+  return data
 }
 
 export function* dataLoaderSagas(): any {
