@@ -14,10 +14,10 @@ export interface Meta<TData = any, TParams = any> {
   apiCall: (params?: TParams) => Promise<any>;
   cacheExpiresIn?: number;
   autoLoad?: boolean;
-  onSuccess?: (data: TData) => any;
-  onFailure?: (error: Error) => any;
+  onSuccess?: (data?: TData) => any;
+  onFailure?: (error?: Error) => any;
   interval?: number;
-  shouldInterval?: (data: TData) => boolean;
+  shouldInterval?: (data?: TData) => boolean;
   params?: TParams;
 }
 

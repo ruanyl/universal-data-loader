@@ -51,8 +51,9 @@ export const initialized = (key: string) => (state: Dict) => {
       loading: false,
       error: null,
     }
+    return { ...state, [key]: dataStorage }
   }
-  return { ...state, [key]: dataStorage }
+  return state
 }
 
 export const started = (key: string) => (state: Dict) => {

@@ -35,6 +35,7 @@ class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponen
     onFailure: () => true,
     shouldInterval: () => true,
   }
+
   componentWillMount() {
     const { name, load, init, ...meta } = this.props;
     if (meta.autoLoad) {
