@@ -13,7 +13,7 @@ export interface Loader<TData = any> extends LoaderStatus<TData> {
   load: Function;
 }
 
-export interface OwnProps<TData = any, TParams = any> extends Meta<TData, TParams> {
+export interface DataLoaderProps<TData = any, TParams = any> extends Meta<TData, TParams> {
   name: string;
   children: (loaderStatus: Loader<TData>) => React.ReactNode;
 }
@@ -27,7 +27,7 @@ export interface DispatchProps<TData = any, TParams = any> {
   init: (name: string) => AnyAction;
 }
 
-class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponent<OwnProps<TData, TParams> & StateProps<TData> & DispatchProps<TData, TParams>, {}> {
+export class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponent<DataLoaderProps<TData, TParams> & StateProps<TData> & DispatchProps<TData, TParams>, {}> {
   static defaultProps = {
     cacheExpiresIn: 0,
     autoLoad: true,
@@ -54,8 +54,8 @@ class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponen
   }
 }
 
-const mapStateToProps = (state: Store, ownProps: OwnProps) => ({
+const mapStateToProps = (state: Store, ownProps: DataLoaderProps) => ({
   loaderStatus: state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][ownProps.name]
 })
 
-export const DataLoader = connect<StateProps, DispatchProps, OwnProps>(mapStateToProps, { load, init })(DataLoaderComponent)
+export const DataLoader = connect<StateProps, DispatchProps, DataLoaderProps>(mapStateToProps, { load, init })(DataLoaderComponent)

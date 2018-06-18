@@ -15,11 +15,11 @@ export interface FailurePayload {
 }
 
 export interface LoaderStatus<TData = any> {
-  data: TData;
+  data: TData | null;
   loading: boolean;
-  error: Error;
-  lastUpdateTime: number | undefined;
-  lastErrorTime: number | undefined;
+  error: Error | null;
+  lastUpdateTime?: number;
+  lastErrorTime?: number;
 }
 
 export interface State {

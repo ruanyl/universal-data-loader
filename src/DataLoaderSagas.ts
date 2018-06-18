@@ -3,6 +3,7 @@ import { put, call, select, takeEvery, fork, cancel, all } from 'redux-saga/effe
 
 import { loadSuccess, loadFailure, Meta, LoadAction, loadStart } from './DataLoaderReducer'
 import * as DL from './DataLoaderState'
+import { isDataValid } from './utils'
 
 type IntervalFunction = (name: string, meta: Meta) => any
 
@@ -31,9 +32,7 @@ function* runInInterval(func: IntervalFunction, name: string, meta: Meta): any {
 
 function* fetchData(name: string, meta: Meta) {
   let data = yield select(DL.getDataStorageValue(name))
-  const cacheExpiresIn = meta.cacheExpiresIn ? meta.cacheExpiresIn : 0
-
-  if (data && (Date.now() - data.lastUpdateTime) < cacheExpiresIn) {
+  if (isDataValid(data, meta)) {
     return data
   }
 
