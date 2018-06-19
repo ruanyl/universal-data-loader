@@ -1,7 +1,7 @@
 {
-  "name": "redux-data-loader",
-  "version": "0.1.0",
-  "description": "typescript react starter",
+  "name": "universal-data-loader",
+  "version": "0.4.0",
+  "description": "Makes it easy to load data for your components",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -50,12 +50,14 @@
   "license": "MIT",
   "keywords": [
     "react-component",
-    "react"
+    "react",
+    "data-loader",
+    "dataloader"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruanyl/react-boilerplate-ts.git"
+    "url": "https://github.com/ruanyl/universal-data-loader"
   },
-  "homepage": "https://github.com/ruanyl/react-boilerplate-ts",
-  "bugs": "https://github.com/ruanyl/react-boilerplate-ts/issues"
+  "homepage": "https://github.com/ruanyl/universal-data-loader",
+  "bugs": "https://github.com/ruanyl/universal-data-loader/issues"
 }
