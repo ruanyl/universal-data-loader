@@ -1,8 +1,5 @@
 import * as React from 'react'
-import { DataLoader } from '../src/DataConsumer'
-import { Loader } from '../src/DataLoader'
-import { LoaderStatus } from '../src/DataLoaderState'
-import { DataProvider } from '../src/DataProvider'
+import { DataLoader, LoaderStatus, Loader, DataProvider } from '../src'
 
 const mockApi = () => {
   return new Promise((resolve) => {

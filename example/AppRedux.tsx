@@ -1,6 +1,5 @@
 import * as React from 'react'
-import { DataLoaderRedux as DataLoader, Loader } from '../src/DataLoader'
-import { LoaderStatus } from '../src/DataLoaderState'
+import { DataLoaderRedux as DataLoader, Loader, LoaderStatus } from '../src'
 
 const mockApi = () => {
   return new Promise((resolve) => {
