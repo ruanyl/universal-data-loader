@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DataLoader, LoaderStatus, Loader, DataProvider } from '../src'
+import { DataLoader, LoaderStatus, Loader } from '../src'
 
 const mockApi = () => {
   return new Promise((resolve) => {
@@ -10,7 +10,7 @@ const mockApi = () => {
 export class App extends React.PureComponent<any, any> {
   render() {
     return (
-      <DataProvider>
+      <div>
         <h3>Example 1: auto load when component mount</h3>
         <DataLoader name="api1" apiCall={mockApi}>
         {
@@ -96,7 +96,7 @@ export class App extends React.PureComponent<any, any> {
           }
         }
         </DataLoader>
-      </DataProvider>
+      </div>
     )
   }
 }

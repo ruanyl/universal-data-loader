@@ -35,12 +35,14 @@ const store = configureStore(reducers, dataLoaderSagas)
 
 ReactDOM.render(
   <Provider store={store}>
-    <div>
-      <h2>With Redux</h2>
-      <AppRedux />
-      <h2>With React new Context API</h2>
-      <AppContext />
-    </div>
+    <DataProvider>
+      <div>
+        <h2>With Redux</h2>
+        <AppRedux />
+        <h2>With React new Context API</h2>
+        <AppContext />
+      </div>
+    </DataProvider>
   </Provider>,
   document.getElementById('root')
 )
