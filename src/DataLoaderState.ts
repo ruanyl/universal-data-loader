@@ -1,29 +1,30 @@
 export interface Dict {
-  [key: string]: any;
+  [key: string]: any
 }
 
 export interface SuccessPayload {
-  key: string;
-  data: any;
-  lastUpdateTime: number;
+  key: string
+  data: any
+  isFresh: boolean
+  lastUpdateTime: number
 }
 
 export interface FailurePayload {
-  key: string;
-  error: Error;
-  lastErrorTime: number;
+  key: string
+  error: Error
+  lastErrorTime: number
 }
 
 export interface LoaderStatus<TData = any> {
-  data: TData | null;
-  loading: boolean;
-  error: Error | null;
-  lastUpdateTime?: number;
-  lastErrorTime?: number;
+  data: TData | null
+  loading: boolean
+  error: Error | null
+  lastUpdateTime?: number
+  lastErrorTime?: number
 }
 
 export interface State {
-  [key: string]: LoaderStatus;
+  [key: string]: LoaderStatus
 }
 
 export const DATA_LOADER_NAMESPACE = '@@dataloader'
@@ -76,7 +77,7 @@ export const succeed = (payload: SuccessPayload) => (state: Dict) => {
     dataStorage = {
       ...dataStorage,
       error: null,
-      loading: false,
+      loading: payload.isFresh ? false : dataStorage.loading,
       data: payload.data,
       lastUpdateTime: payload.lastUpdateTime,
     }

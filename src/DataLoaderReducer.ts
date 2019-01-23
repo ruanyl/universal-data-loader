@@ -1,29 +1,32 @@
 import { createReducer, valueReducer } from 'reducer-tools'
 
 import * as DL from './DataLoaderState'
+import {DataPersister} from './DataPersister'
 
 export interface Action {
-  type: string;
-  value?: any;
-  meta?: any;
+  type: string
+  value?: any
+  meta?: any
 }
 
 export type DataLoaderReducer = (s: any, a: Action) => any
 
 export interface Meta<TData = any, TParams = any> {
-  apiCall: (params?: TParams) => Promise<any>;
-  cacheExpiresIn?: number;
-  autoLoad?: boolean;
-  onSuccess?: (data?: TData) => any;
-  onFailure?: (error?: Error) => any;
-  interval?: number;
-  shouldInterval?: (data?: TData) => boolean;
-  params?: TParams;
+  apiCall: (params?: TParams) => Promise<any>
+  cacheExpiresIn?: number
+  autoLoad?: boolean
+  onSuccess?: (data?: TData) => any
+  onFailure?: (error?: Error) => any
+  interval?: number
+  shouldInterval?: (data?: TData) => boolean
+  params?: TParams
+  dataPersister?: DataPersister
+  lazyLoad?: boolean
 }
 
 export interface LoadAction extends Action {
-  value: string;
-  meta: Meta;
+  value: string
+  meta: Meta
 }
 
 export const init = (key: string) => ({
@@ -42,11 +45,12 @@ export const loadStart = (key: string) => ({
   value: key,
 })
 
-export const loadSuccess = (key: string, data: any) => ({
+export const loadSuccess = (key: string, data: any, isFresh: boolean) => ({
   type: '@@DATA_LOADER/LOAD_DATA_SUCCESS',
   value: {
     key,
     data,
+    isFresh,
     lastUpdateTime: Date.now(),
   },
 })

@@ -16,7 +16,7 @@ function* load(action: LoadAction) {
   }
 }
 
-function* runInInterval(func: IntervalFunction, name: string, meta: Meta): any {
+function* runInInterval(func: IntervalFunction, name: string, meta: Meta): IterableIterator<any> {
   const task: Task = yield fork(func, name, meta)
   yield call(delay, meta.interval)
 
@@ -36,14 +36,23 @@ function* fetchData(name: string, meta: Meta) {
     return data
   }
 
-  try {
-    yield put(loadStart(name))
-    data = yield call(meta.apiCall, meta.params)
-    yield put(loadSuccess(name, data))
+  yield put(loadStart(name))
 
-    if (meta.onSuccess) {
-      yield call(meta.onSuccess, data)
+  try {
+    if (meta.dataPersister) {
+      data = meta.dataPersister.getItem(name, meta)
     }
+
+    if (data && meta.lazyLoad) {
+      yield call(handleData, data, name, meta, false)
+    }
+
+    data = yield call(refresh, name, meta)
+
+    if (meta.dataPersister) {
+      yield call(meta.dataPersister.setItem, name, data, meta)
+    }
+
   } catch (e) {
     yield put(loadFailure(name, e))
 
@@ -54,7 +63,21 @@ function* fetchData(name: string, meta: Meta) {
   return data
 }
 
-export function* dataLoaderSagas(): any {
+function* refresh(name: string, meta: Meta) {
+  const data = yield call(meta.apiCall, meta.params)
+  yield call(handleData, data, name, meta, true)
+  return data
+}
+
+function* handleData(data: any, name: string, meta: Meta, isFresh: boolean) {
+  yield put(loadSuccess(name, data, isFresh))
+
+  if (meta.onSuccess) {
+    yield call(meta.onSuccess, data)
+  }
+}
+
+export function* dataLoaderSagas() {
   yield all([
     takeEvery('@@DATA_LOADER/LOAD', load),
   ])

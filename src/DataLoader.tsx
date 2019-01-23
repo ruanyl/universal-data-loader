@@ -1,6 +1,6 @@
+import React from 'react'
 import { connect } from 'react-redux'
 import { AnyAction } from 'redux'
-import * as React from 'react'
 
 import { LoaderStatus, State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
 import { load, init, Meta } from './DataLoaderReducer'

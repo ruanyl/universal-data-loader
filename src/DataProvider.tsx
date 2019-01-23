@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 import { DATA_LOADER_NAMESPACE, LoaderStatus } from './DataLoaderState'
 import { Meta } from './DataLoaderReducer'
