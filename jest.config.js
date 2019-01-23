@@ -18,4 +18,5 @@ module.exports = {
     '!src/**/*.d.ts',
   ],
   setupTestFrameworkScriptFile: './setupTests.ts',
+  testURL: 'http://localhost/',
 };

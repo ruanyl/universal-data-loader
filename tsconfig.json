@@ -13,6 +13,7 @@
     "lib": ["ES2015","ES2016", "ESNEXT", "DOM", "ES5", "ScriptHost", "ES2015.Promise"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "setupTests.ts"
   ]
 }

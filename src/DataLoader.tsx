@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 import { AnyAction } from 'redux'
 
 import { LoaderStatus, State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
-import { load, init, Meta } from './DataLoaderReducer'
+import { load, init } from './DataLoaderReducer'
+import { Meta } from './DataLoader.types';
 
 interface Store {
   [key: string]: State;

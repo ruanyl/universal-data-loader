@@ -1,13 +1,12 @@
-import { init, loadStart, loadSuccess, loadFailure } from '../src/DataLoaderState'
+import { initialized, started, succeed, failed } from '../src/DataLoaderState'
 
 describe('DateLoaderState', () => {
-  let state;
+  let state: any;
   beforeEach(() => {
     state = {}
   });
 
   it('init the state with a key', () => {
-    const key = 'user'
     const expectedState = {
       user: {
         data: null,
@@ -15,12 +14,11 @@ describe('DateLoaderState', () => {
         error: null,
       }
     }
-    const initialState = init('user')(state)
+    const initialState = initialized('user')(state)
     expect(initialState).toEqual(expectedState)
   })
 
   it('should update `loading` to true when load started', function() {
-    const key = 'user'
     const expectedState = {
       user: {
         data: null,
@@ -28,7 +26,7 @@ describe('DateLoaderState', () => {
         error: null,
       }
     }
-    const initialState = loadStart('user')(state)
+    const initialState = started('user')(state)
     expect(initialState).toEqual(expectedState)
   });
 
@@ -44,6 +42,7 @@ describe('DateLoaderState', () => {
       key: 'user',
       data: { name: 'username' },
       lastUpdateTime: Date.now(),
+      isFresh: true,
     }
     const expectedState = {
       user: {
@@ -53,7 +52,7 @@ describe('DateLoaderState', () => {
         loading: false,
       }
     }
-    expect(loadSuccess(payload)(initialState)).toEqual(expectedState)
+    expect(succeed(payload)(initialState)).toEqual(expectedState)
   });
 
   it('when load failed, it should set `error` to Error, `loading` to false, lastErrorTime to a timestamp', function() {
@@ -77,6 +76,6 @@ describe('DateLoaderState', () => {
         loading: false,
       }
     }
-    expect(loadFailure(payload)(initialState)).toEqual(expectedState)
+    expect(failed(payload)(initialState)).toEqual(expectedState)
   });
 });

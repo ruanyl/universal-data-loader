@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { DATA_LOADER_NAMESPACE, LoaderStatus } from './DataLoaderState'
-import { Meta } from './DataLoaderReducer'
+import { Meta } from './DataLoader.types'
 import { isDataValid, all, race } from './utils'
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms))

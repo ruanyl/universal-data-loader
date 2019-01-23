@@ -1,4 +1,4 @@
-import { Meta } from './DataLoaderReducer';
+import { Meta } from './DataLoader.types';
 
 export interface Competitors {
   [key: string]: Promise<any>;

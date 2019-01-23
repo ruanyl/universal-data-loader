@@ -1,9 +1,10 @@
 import { delay, Task } from 'redux-saga'
 import { put, call, select, takeEvery, fork, cancel, all } from 'redux-saga/effects'
 
-import { loadSuccess, loadFailure, Meta, LoadAction, loadStart } from './DataLoaderReducer'
 import * as DL from './DataLoaderState'
+import { loadSuccess, loadFailure, LoadAction, loadStart } from './DataLoaderReducer'
 import { isDataValid } from './utils'
+import { Meta } from './DataLoader.types';
 
 type IntervalFunction = (name: string, meta: Meta) => any
 

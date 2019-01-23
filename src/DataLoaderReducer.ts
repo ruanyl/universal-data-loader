@@ -1,28 +1,9 @@
 import { createReducer, valueReducer } from 'reducer-tools'
 
 import * as DL from './DataLoaderState'
-import {DataPersister} from './DataPersister'
-
-export interface Action {
-  type: string
-  value?: any
-  meta?: any
-}
+import { Action, Meta } from './DataLoader.types'
 
 export type DataLoaderReducer = (s: any, a: Action) => any
-
-export interface Meta<TData = any, TParams = any> {
-  apiCall: (params?: TParams) => Promise<any>
-  cacheExpiresIn?: number
-  autoLoad?: boolean
-  onSuccess?: (data?: TData) => any
-  onFailure?: (error?: Error) => any
-  interval?: number
-  shouldInterval?: (data?: TData) => boolean
-  params?: TParams
-  dataPersister?: DataPersister
-  lazyLoad?: boolean
-}
 
 export interface LoadAction extends Action {
   value: string

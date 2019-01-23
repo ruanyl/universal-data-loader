@@ -55,7 +55,7 @@ describe('DataLoaderReducer', function() {
     }
     expect(state1).toEqual(expectedState1)
 
-    const action2 = loadSuccess('user', { name: 'username' })
+    const action2 = loadSuccess('user', { name: 'username' }, true)
     const state2 = dataLoaderReducer(state1, action2)
     const expectedState2 = {
       user: {
