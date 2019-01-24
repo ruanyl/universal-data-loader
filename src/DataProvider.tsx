@@ -44,14 +44,14 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
     })
   }
 
-  succeed = (name: string, data: any) => {
+  succeed = (name: string, data: any, isFresh: boolean) => {
     this.setState(state => {
       let dataStorage = state[DATA_LOADER_NAMESPACE][name]
       if (dataStorage) {
         dataStorage = {
           ...dataStorage,
           error: null,
-          loading: false,
+          loading: isFresh ? false : dataStorage.loading,
           data,
           lastUpdateTime: Date.now(),
         }
@@ -93,6 +93,13 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
     })
   }
 
+  handleData = (data: any, name: string, meta: Meta, isFresh: boolean) => {
+    this.succeed(name, data, isFresh)
+    if (meta.onSuccess) {
+      meta.onSuccess(data)
+    }
+  }
+
   fetchOnce = async (name: string, meta: Meta, timeout?: number) => {
     let result = this.state[DATA_LOADER_NAMESPACE][name]
     if (isDataValid(result, meta)) {
@@ -101,6 +108,14 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
 
     this.started(name)
     try {
+      if (meta.dataPersister) {
+        result = meta.dataPersister.getItem(name, meta)
+      }
+
+      if (result && meta.lazyLoad) {
+        this.handleData(result, name, meta, false)
+      }
+
       if (timeout) {
         // terminate the execution if timeout
         const data = await race({
@@ -115,11 +130,11 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
         result = await meta.apiCall(meta.params)
       }
 
-      this.succeed(name, result)
-
-      if (meta.onSuccess) {
-        meta.onSuccess(result)
+      this.handleData(result, name, meta, true)
+      if (meta.dataPersister) {
+        meta.dataPersister.setItem(name, result)
       }
+
     } catch (e) {
       this.failed(name, e)
       if (meta.onFailure) {

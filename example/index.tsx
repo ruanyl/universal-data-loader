@@ -37,8 +37,6 @@ ReactDOM.render(
   <Provider store={store}>
     <DataProvider>
       <div>
-        <h2>With Redux</h2>
-        <AppRedux />
         <h2>With React new Context API</h2>
         <AppContext />
       </div>

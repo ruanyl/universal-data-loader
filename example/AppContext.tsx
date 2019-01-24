@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DataLoader, LoaderStatus, Loader } from '../src'
+import { DataLoader, LoaderStatus, Loader, LocalStorageDataPersister } from '../src'
 
 const mockApi = () => {
   return new Promise((resolve) => {
@@ -93,6 +93,18 @@ export class App extends React.PureComponent<any, any> {
               return <div>loading...</div>
             }
             return <div>{loader.data}</div>
+          }
+        }
+        </DataLoader>
+
+        <h3>Example 4: with localStorage</h3>
+        <DataLoader name="api4" apiCall={mockApi} dataPersister={LocalStorageDataPersister()} lazyLoad={true}>
+        {
+          (loader: Loader<number>) => {
+            if (loader.error) {
+              return <div>Error!!!</div>
+            }
+            return <div>{loader.data ? loader.data : 'No Data!'}-{loader.loading ? 'loading' : ''}</div>
           }
         }
         </DataLoader>
