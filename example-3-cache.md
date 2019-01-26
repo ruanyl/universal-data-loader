@@ -1,8 +1,5 @@
----
-description: >-
-  Configure how much time the data will be valid before making another api call
-  to fetch fresh data
----
+Configure how much time the data will be valid before making another api call
+to fetch fresh data
 
 # Example 3: cache
 

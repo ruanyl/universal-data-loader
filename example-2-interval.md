@@ -1,6 +1,4 @@
----
-description: Fetch data in an interval
----
+Fetch data in an interval
 
 # Example 2: interval
 

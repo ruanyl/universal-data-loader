@@ -1,6 +1,4 @@
----
-description: Stop auto load data when component mount
----
+Stop auto load data when component mount
 
 # Example 1: fetch data manually
 

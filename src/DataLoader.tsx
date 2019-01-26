@@ -1,6 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { AnyAction } from 'redux'
+import { connect, Omit } from 'react-redux'
 
 import { LoaderStatus, State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
 import { load, init } from './DataLoaderReducer'
@@ -10,13 +9,13 @@ interface Store {
   [key: string]: State;
 }
 
-export interface Loader<TData = any> extends LoaderStatus<TData> {
-  load: Function;
+export interface Loader<TData = any, TParams = any> extends LoaderStatus<TData> {
+  load: (params: TParams) => any;
 }
 
-export interface DataLoaderProps<TData = any, TParams = any> extends Meta<TData, TParams> {
+export interface DataLoaderProps<TData = any, TParams = any> extends Omit<Meta<TData, TParams>, 'params'> {
   name: string;
-  children: (loaderStatus: Loader<TData>) => React.ReactNode;
+  children: (loader: Loader<TData, TParams>) => React.ReactNode;
 }
 
 export interface StateProps<TData = any> {
@@ -24,8 +23,8 @@ export interface StateProps<TData = any> {
 }
 
 export interface DispatchProps<TData = any, TParams = any> {
-  load: (name: string, meta: Meta<TData, TParams>) => AnyAction;
-  init: (name: string) => AnyAction;
+  load: (name: string, meta: Meta<TData, TParams>) => any;
+  init: (name: string) => any;
 }
 
 export class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponent<DataLoaderProps<TData, TParams> & StateProps<TData> & DispatchProps<TData, TParams>, {}> {
@@ -49,7 +48,7 @@ export class DataLoaderComponent<TData = any, TParams = any> extends React.PureC
   render() {
     const { name, load, ...meta } = this.props
     if (this.props.loaderStatus) {
-      return this.props.children({ ...this.props.loaderStatus, load: () =>  load(name, meta) })
+      return this.props.children({ ...this.props.loaderStatus, load: (params: TParams) => load(name, { ...meta, params }) })
     }
     return null
   }
