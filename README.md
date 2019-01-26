@@ -1,7 +1,3 @@
----
-description: Easily fetch data in React
----
-
 # Introduction
 
 universal-data-loader is a library that aims to make data fetching easier to manage in React application. You can easily manage cache, integrate with data persisters\(such as localStorage\), configure fetching behaviours. It works with [redux](https://github.com/reduxjs/redux) + [redux-saga](https://github.com/redux-saga/redux-saga) or the new [React Context API](https://reactjs.org/docs/context.html)
