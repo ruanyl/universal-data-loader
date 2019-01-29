@@ -1,8 +1,10 @@
-Fetch data in an interval
-
 # Example 2: interval
 
-#### Configure to automatically fetch data every 3s
+Fetch data in an interval
+
+## Example 2: interval
+
+### Configure to automatically fetch data every 3s
 
 ```typescript
 const App = () =>

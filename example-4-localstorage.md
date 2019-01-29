@@ -1,8 +1,8 @@
-Persist data with localStorage, so that next time when app initialized, data
-can be reloaded from localStorage immediately. And make the api call at the
-same time to fetch fresh data.
-
 # Example 4: localStorage
+
+Persist data with localStorage, so that next time when app initialized, data can be reloaded from localStorage immediately. And make the api call at the same time to fetch fresh data.
+
+## Example 4: localStorage
 
 ```typescript
 import { LocalStorageDataPersister } from 'universal-data-loader'

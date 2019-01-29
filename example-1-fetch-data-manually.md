@@ -1,6 +1,8 @@
+# Example 1: fetch data manually
+
 Stop auto load data when component mount
 
-# Example 1: fetch data manually
+## Example 1: fetch data manually
 
 `DataLoader` component will start to fetch data automatically by default\(when component mount\). You can disabled auto load and start to load data manually, for example, by clicking a button.
 
@@ -24,6 +26,4 @@ const App = () =>
   }
   </DataLoader>
 ```
-
-
 

@@ -1,7 +1,8 @@
-Configure how much time the data will be valid before making another api call
-to fetch fresh data
-
 # Example 3: cache
+
+Configure how much time the data will be valid before making another api call to fetch fresh data
+
+## Example 3: cache
 
 Configure cache expires in 5s, in this example, when clicking the load button, it will only run the api call after 5s the last time data was loaded
 
@@ -30,6 +31,5 @@ const App = () =>
     }
   }
   </DataLoader>
-
 ```
 

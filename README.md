@@ -6,11 +6,11 @@ universal-data-loader is a library that aims to make data fetching easier to man
 
 ### Install
 
-```
+```text
 $ npm i universal-data-loader --save
 ```
 
-### Usage Example <a id="usage-example"></a>
+### Usage Example  <a id="usage-example"></a>
 
 #### step 1: say you have an api call
 
@@ -62,7 +62,7 @@ The `loader` that child function gets as parameter:
 // lastErrorTime: the last time that data fetching throw an error
 // load: call this function to manually start to load data
 interface Loader<T = any> {
-  data: TData | null
+  data: T | null
   loading: boolean
   error: Error | null
   lastUpdateTime?: number
@@ -101,16 +101,4 @@ const reducers = combineReducers({
 // run sagas with dataLoaderSagas
 sagaMiddleware.run(dataLoaderSagas)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
