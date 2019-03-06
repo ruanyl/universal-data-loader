@@ -1,16 +1,10 @@
 import React from 'react'
-import { connect, Omit } from 'react-redux'
 
-import { LoaderStatus, State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
-import { load, init } from './DataLoaderReducer'
-import { Meta } from './DataLoader.types';
-
-interface Store {
-  [key: string]: State;
-}
+import { LoaderStatus } from './DataLoaderState'
+import { Meta, Omit } from './DataLoader.types';
 
 export interface Loader<TData = any, TParams = any> extends LoaderStatus<TData> {
-  load: (params: TParams) => any;
+  load: (params?: TParams) => any;
 }
 
 export interface DataLoaderProps<TData = any, TParams = any> extends Omit<Meta<TData, TParams>, 'params'> {
@@ -53,9 +47,3 @@ export class DataLoaderComponent<TData = any, TParams = any> extends React.PureC
     return null
   }
 }
-
-const mapStateToProps = (state: Store, ownProps: DataLoaderProps) => ({
-  loaderStatus: state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][ownProps.name]
-})
-
-export const DataLoaderRedux = connect<StateProps, DispatchProps, DataLoaderProps>(mapStateToProps, { load, init })(DataLoaderComponent)

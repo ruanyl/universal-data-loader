@@ -10,10 +10,9 @@
     "jsx": "react",
     "target": "es5",
     "noUnusedLocals": true,
-    "lib": ["ES2015","ES2016", "ESNEXT", "DOM", "ES5", "ScriptHost", "ES2015.Promise"]
+    "lib": ["es2015","es2016", "esnext", "dom", "es5", "scripthost", "es2015.promise"]
   },
   "include": [
-    "src/**/*",
-    "setupTests.ts"
+    "src/**/*"
   ]
 }
