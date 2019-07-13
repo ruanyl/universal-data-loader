@@ -1,6 +1,6 @@
 {
   "name": "universal-data-loader",
-  "version": "0.5.5",
+  "version": "1.0.0",
   "description": "Makes it easy to load data for your components",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
