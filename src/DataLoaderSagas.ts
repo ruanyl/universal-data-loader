@@ -6,19 +6,19 @@ import { loadSuccess, loadFailure, LoadAction, loadStart } from './DataLoaderRed
 import { isDataValid } from './utils'
 import { Meta } from './DataLoader.types';
 
-type IntervalFunction = (name: string, meta: Meta) => any
+type IntervalFunction = (meta: Meta) => any
 
 function* load(action: LoadAction) {
-  const { value, meta } = action
+  const { value: meta } = action
   if (meta.interval) {
-    yield call(runInInterval, fetchData, value, meta)
+    yield call(runInInterval, fetchData, meta)
   } else {
-    yield call(fetchData, value, meta)
+    yield call(fetchData, meta)
   }
 }
 
-function* runInInterval(func: IntervalFunction, name: string, meta: Meta): IterableIterator<any> {
-  const task: Task = yield fork(func, name, meta)
+function* runInInterval(func: IntervalFunction, meta: Meta): IterableIterator<any> {
+  const task: Task = yield fork(func, meta)
   yield call(delay, meta.interval)
 
   // cancel task if task is still running after interval
@@ -27,35 +27,41 @@ function* runInInterval(func: IntervalFunction, name: string, meta: Meta): Itera
   }
 
   if (meta.shouldInterval && meta.shouldInterval(task.result())) {
-    yield call(runInInterval, func, name, meta)
+    yield call(runInInterval, func, meta)
   }
 }
 
-function* fetchData(name: string, meta: Meta) {
-  let data = yield select(DL.getDataStorageValue(name))
-  if (isDataValid(data, meta)) {
+function* fetchData(meta: Meta) {
+  const name = meta.name
+  const key = meta.dataKey(meta.name, meta.params)
+
+  let data = yield select(DL.getDataStorageValue(name, key))
+  if (data && isDataValid(data, meta)) {
     return data
   }
 
-  yield put(loadStart(name))
+  yield put(loadStart(meta))
 
   try {
     if (meta.dataPersister) {
-      data = meta.dataPersister.getItem(name, meta)
+      data = meta.dataPersister.getItem(key, meta)
     }
 
+    // when it's lazy load(data retrieved from cache, for example, localstorage)
+    // then set data to state immediately
     if (data && meta.lazyLoad) {
-      yield call(handleData, data, name, meta, false)
+      yield call(handleData, data, meta, false)
     }
 
-    data = yield call(refresh, name, meta)
+    data = yield call(meta.apiCall, meta.params)
+    yield call(handleData, data, meta, true)
 
     if (meta.dataPersister) {
-      yield call(meta.dataPersister.setItem, name, data, meta)
+      yield call(meta.dataPersister.setItem, key, data, meta)
     }
 
   } catch (e) {
-    yield put(loadFailure(name, e))
+    yield put(loadFailure(meta, e))
 
     if (meta.onFailure) {
       yield call(meta.onFailure, e)
@@ -64,14 +70,8 @@ function* fetchData(name: string, meta: Meta) {
   return data
 }
 
-function* refresh(name: string, meta: Meta) {
-  const data = yield call(meta.apiCall, meta.params)
-  yield call(handleData, data, name, meta, true)
-  return data
-}
-
-function* handleData(data: any, name: string, meta: Meta, isFresh: boolean) {
-  yield put(loadSuccess(name, data, isFresh))
+function* handleData(data: any, meta: Meta, isFresh: boolean) {
+  yield put(loadSuccess(meta, data, isFresh))
 
   if (meta.onSuccess) {
     yield call(meta.onSuccess, data)

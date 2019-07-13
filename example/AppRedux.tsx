@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { LocalStorageDataPersister, Loader } from 'universal-data-loader'
-import { DataLoaderRedux as DataLoader } from 'universal-data-loader/redux'
+import { LocalStorageDataPersister, Loader } from '../src'
+import { DataLoader } from '../src/redux'
 
 const mockApi = () => {
   return new Promise((resolve) => {

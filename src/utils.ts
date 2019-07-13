@@ -1,4 +1,5 @@
 import { Meta } from './DataLoader.types';
+import {LoaderStatus} from './DataLoaderState';
 
 export interface Competitors {
   [key: string]: Promise<any>;
@@ -8,9 +9,9 @@ export type All<T> = {
   [P in keyof T]: any;
 }
 
-export const isDataValid = (data: any, meta: Meta): boolean => {
+export const isDataValid = (data: LoaderStatus, meta: Meta): boolean => {
   const cacheExpiresIn = meta.cacheExpiresIn ? meta.cacheExpiresIn : 0
-  if (data && (Date.now() - data.lastUpdateTime) < cacheExpiresIn) {
+  if (data && (Date.now() - data.lastUpdateTime!) < cacheExpiresIn) {
     return true
   }
   return false

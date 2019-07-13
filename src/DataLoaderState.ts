@@ -1,18 +1,9 @@
-export interface Dict {
-  [key: string]: any
-}
+import {InitAction, LoadStartAction, LoadSuccessAction, LoadFailureAction} from './DataLoaderReducer';
 
-export interface SuccessPayload {
-  key: string
-  data: any
-  isFresh: boolean
-  lastUpdateTime: number
-}
+export const DATA_LOADER_NAMESPACE = '@@dataloader'
 
-export interface FailurePayload {
-  key: string
-  error: Error
-  lastErrorTime: number
+export interface GlobalState {
+  [DATA_LOADER_NAMESPACE]: State
 }
 
 export interface LoaderStatus<TData = any> {
@@ -24,78 +15,90 @@ export interface LoaderStatus<TData = any> {
 }
 
 export interface State {
-  [key: string]: LoaderStatus
+  [key: string]: {
+    [key: string]: LoaderStatus
+  }
 }
 
-export const DATA_LOADER_NAMESPACE = '@@dataloader'
-
-export const getDataStorageValue = (key: string) => (state: Dict) => {
-  if (state && state[DATA_LOADER_NAMESPACE]) {
-    return state[DATA_LOADER_NAMESPACE][key]
+export const getDataStorageValue = (name: string, key: string) => (state: GlobalState) => {
+  if (state && state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][name]) {
+    return state[DATA_LOADER_NAMESPACE][name][key]
   }
   return undefined
 }
 
-export const getDataStorageByKeys = (keys: string[]) => (state: Dict) => {
-  const dataStorages: Dict = {}
-  keys.forEach(key => {
-    dataStorages[key] = state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][key]
+export const update = (name: string, key: string, state: State, data: Partial<LoaderStatus>): State => {
+  let dataStorage = state[name] || {}
+  // initialize with default values if data NOT exist
+  if (!dataStorage[key]) {
+    dataStorage = {
+      ...dataStorage,
+      [key]: {
+        data: null,
+        loading: false,
+        error: null,
+      }
+    }
+  }
+
+  // update the state with data
+  dataStorage = {
+    ...dataStorage,
+    [key]: {
+      ...dataStorage[key],
+      ...data,
+    }
+  }
+
+  return {
+    ...state,
+    [name]: dataStorage
+  }
+}
+
+export const initialized = (state: State, action: InitAction) => {
+  const name = action.value.name
+  const key = action.value.dataKey(name, action.value.params)
+  return update(name, key, state, {
+    data: null,
+    loading: false,
+    error: null,
   })
-  return dataStorages
 }
 
-export const initialized = (key: string) => (state: Dict) => {
-  let dataStorage = state[key]
-  if (!dataStorage) {
-    dataStorage = {
-      data: null,
+export const started = (state: State, action: LoadStartAction) => {
+  const name = action.value.name
+  const key = action.value.dataKey(name, action.value.params)
+  return update(name, key, state, { loading: true })
+}
+
+export const succeed = (state: State, action: LoadSuccessAction) => {
+  const name = action.value.meta.name
+  const key = action.value.meta.dataKey(name, action.value.meta.params)
+
+  let updated: Partial<LoaderStatus> = {
+    data: action.value.data,
+    error: null,
+    lastUpdateTime: action.value.lastUpdateTime,
+  }
+
+  if (action.value.isFresh) {
+    updated = {
+      ...updated,
       loading: false,
-      error: null,
     }
-    return { ...state, [key]: dataStorage }
   }
-  return state
+
+  return update(name, key, state, updated)
 }
 
-export const started = (key: string) => (state: Dict) => {
-  let dataStorage = state[key]
-  if (!dataStorage) {
-    dataStorage = {
-      data: null,
-      loading: true,
-      error: null,
-    }
-  } else {
-    dataStorage = { ...dataStorage, loading: true }
-  }
-  return { ...state, [key]: dataStorage }
-}
+export const failed = (state: State, action: LoadFailureAction) => {
+  const name = action.value.meta.name
+  const key = action.value.meta.dataKey(name, action.value.meta.params)
 
-export const succeed = (payload: SuccessPayload) => (state: Dict) => {
-  let dataStorage = state[payload.key]
-  if (dataStorage) {
-    dataStorage = {
-      ...dataStorage,
-      error: null,
-      loading: payload.isFresh ? false : dataStorage.loading,
-      data: payload.data,
-      lastUpdateTime: payload.lastUpdateTime,
-    }
-    return { ...state, [payload.key]: dataStorage }
-  }
-  return state
-}
-
-export const failed = (payload: FailurePayload) => (state: Dict) => {
-  let dataStorage = state[payload.key]
-  if (dataStorage) {
-    dataStorage = {
-      ...dataStorage,
-      error: payload.error,
-      loading: false,
-      lastErrorTime: payload.lastErrorTime,
-    }
-    return { ...state, [payload.key]: dataStorage }
-  }
-  return state
+  return update(name, key, state, {
+    error: action.value.error,
+    loading: false,
+    lastErrorTime: action.value.lastErrorTime,
+  })
 }

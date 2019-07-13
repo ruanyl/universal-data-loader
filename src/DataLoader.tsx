@@ -1,48 +1,55 @@
 import React from 'react'
 
 import { LoaderStatus } from './DataLoaderState'
-import { Meta, Omit } from './DataLoader.types';
+import { Meta, MandatoryProps, OptionalProps } from './DataLoader.types';
 
-export interface Loader<TData = any, TParams = any> extends LoaderStatus<TData> {
-  load: (params?: TParams) => any;
+export interface Loader<TData = any> extends LoaderStatus<TData> {
+  load: () => any;
 }
 
-export interface DataLoaderProps<TData = any, TParams = any> extends Omit<Meta<TData, TParams>, 'params'> {
-  name: string;
-  children: (loader: Loader<TData, TParams>) => React.ReactNode;
+export interface DataLoaderProps<TData = any, TParams = any> extends MandatoryProps<TParams>, Partial<OptionalProps<TData, TParams>> {
+  children: (loader: Loader<TData>) => React.ReactNode;
+}
+
+export interface DataLoaderComponentProps<TData = any, TParams = any> extends MandatoryProps<TParams>, OptionalProps<TData, TParams> {
+  children: (loader: Loader<TData>) => React.ReactNode;
 }
 
 export interface StateProps<TData = any> {
-  loaderStatus: LoaderStatus<TData>;
+  loaderStatus?: LoaderStatus<TData>;
 }
 
 export interface DispatchProps<TData = any, TParams = any> {
-  load: (name: string, meta: Meta<TData, TParams>) => any;
-  init: (name: string) => any;
+  load: (meta: Meta<TData, TParams>) => any;
+  init: (meta: Meta<TData, TParams>) => any;
 }
 
-export class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponent<DataLoaderProps<TData, TParams> & StateProps<TData> & DispatchProps<TData, TParams>, {}> {
+export class DataLoaderComponent<TData = any, TParams = any> extends React.PureComponent<DataLoaderComponentProps<TData, TParams> & StateProps<TData> & DispatchProps<TData, TParams>, {}> {
   static defaultProps = {
     cacheExpiresIn: 0,
     autoLoad: true,
     onSuccess: () => true,
     onFailure: () => true,
+    interval: 0,
     shouldInterval: () => true,
+    params: undefined,
+    dataPersister: undefined,
+    lazyLoad: false,
   }
 
   componentWillMount() {
-    const { name, load, init, ...meta } = this.props;
+    const { load, init, loaderStatus, children, ...meta } = this.props;
     if (meta.autoLoad) {
-      load(name, meta)
+      load(meta)
     } else {
-      init(name)
+      init(meta)
     }
   }
 
   render() {
-    const { name, load, ...meta } = this.props
-    if (this.props.loaderStatus) {
-      return this.props.children({ ...this.props.loaderStatus, load: (params: TParams) => load(name, { ...meta, params }) })
+    const { load, init, loaderStatus, children, ...meta } = this.props
+    if (loaderStatus) {
+      return children({ ...loaderStatus, load: () => load(meta) })
     }
     return null
   }

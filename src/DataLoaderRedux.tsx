@@ -1,15 +1,24 @@
 import { connect } from 'react-redux'
 
 import { load, init } from './DataLoaderReducer'
-import { State, DATA_LOADER_NAMESPACE } from './DataLoaderState'
+import { DATA_LOADER_NAMESPACE, GlobalState } from './DataLoaderState'
 import { DataLoaderProps, DataLoaderComponent, StateProps, DispatchProps } from './DataLoader';
 
-interface Store {
-  [key: string]: State;
+const mapStateToProps = (state: GlobalState, ownProps: DataLoaderProps) => {
+  const name = ownProps.name
+  const key = ownProps.dataKey ? ownProps.dataKey(name, ownProps.params) : 'default'
+  return {
+    loaderStatus: state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][ownProps.name] && state[DATA_LOADER_NAMESPACE][ownProps.name][key]
+  }
 }
 
-const mapStateToProps = (state: Store, ownProps: DataLoaderProps) => ({
-  loaderStatus: state[DATA_LOADER_NAMESPACE] && state[DATA_LOADER_NAMESPACE][ownProps.name]
-})
+const mergeProps = (stateProps: StateProps, dispatchProps: DispatchProps, ownProps: DataLoaderProps) => {
+  return {
+    ...stateProps,
+    ...dispatchProps,
+    ...ownProps,
+    dataKey: ownProps.dataKey || (() => 'default'),
+  }
+}
 
-export const DataLoader = connect<StateProps, DispatchProps, DataLoaderProps>(mapStateToProps, { load, init })(DataLoaderComponent)
+export const DataLoader = connect(mapStateToProps, { load, init }, mergeProps)(DataLoaderComponent)

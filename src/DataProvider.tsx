@@ -6,28 +6,53 @@ import { isDataValid, all, race } from './utils'
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms))
 
-export const DataLoaderContext = React.createContext({
-  [DATA_LOADER_NAMESPACE]: {}
+export interface ContextType {
+  [DATA_LOADER_NAMESPACE]: DataShape
+  load: DataFunc
+  init: DataFunc
+}
+
+export const DataLoaderContext = React.createContext<ContextType>({
+  [DATA_LOADER_NAMESPACE]: {},
+  load: function() {},
+  init: function() {},
 })
 
+export interface DataShape {
+  [key: string]: {
+    [key: string]: LoaderStatus
+  }
+}
+
+export type DataFunc = (meta: Meta) => any
+
 export interface DataProviderState {
-  [DATA_LOADER_NAMESPACE]: {
-    [key: string]: LoaderStatus;
-  };
-  load: (name: string, meta: Meta) => any;
-  init: (name: string) => any;
+  [DATA_LOADER_NAMESPACE]: DataShape
 }
 
 export class DataProvider extends React.PureComponent<{}, DataProviderState> {
 
-  started = (name: string) => {
+  update = (name: string, key: string, data: Partial<LoaderStatus>) => {
     this.setState(state => {
-      let dataStorage = state[DATA_LOADER_NAMESPACE][name]
-      if (!dataStorage) {
+      let dataStorage = state[DATA_LOADER_NAMESPACE][name] || {}
+      // initialize with default values if data NOT exist
+      if (!dataStorage[key]) {
         dataStorage = {
-          data: null,
-          loading: true,
-          error: null,
+          ...dataStorage,
+          [key]: {
+            data: null,
+            loading: false,
+            error: null,
+          }
+        }
+      }
+
+      // update the state with data
+      dataStorage = {
+        ...dataStorage,
+        [key]: {
+          ...dataStorage[key],
+          ...data,
         }
       }
 
@@ -35,85 +60,67 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
         ...state,
         [DATA_LOADER_NAMESPACE]: {
           ...state[DATA_LOADER_NAMESPACE],
-          [name]: {
-            ...dataStorage,
-            loading: true,
-          }
+          [name]: dataStorage,
         }
       }
     })
   }
 
-  succeed = (name: string, data: any, isFresh: boolean) => {
-    this.setState(state => {
-      let dataStorage = state[DATA_LOADER_NAMESPACE][name]
-      if (dataStorage) {
-        dataStorage = {
-          ...dataStorage,
-          error: null,
-          loading: isFresh ? false : dataStorage.loading,
-          data,
-          lastUpdateTime: Date.now(),
-        }
-        return {
-          ...state,
-          [DATA_LOADER_NAMESPACE]: {
-            ...state[DATA_LOADER_NAMESPACE],
-            [name]: {
-              ...dataStorage,
-            }
-          }
-        }
+  started = (name: string, key: string) => {
+    this.update(name, key, { loading: true })
+  }
+
+  succeed = (name: string, key: string, data: any, isFresh: boolean) => {
+    let updated: Partial<LoaderStatus> = {
+      data,
+      error: null,
+      lastUpdateTime: Date.now(),
+    }
+
+    if (isFresh) {
+      updated = {
+        ...updated,
+        loading: false,
       }
-      return state
+    }
+
+    this.update(name, key, updated)
+  }
+
+  failed = (name: string, key: string, error: Error) => {
+    this.update(name, key, {
+      error,
+      loading: false,
+      lastErrorTime: Date.now(),
     })
   }
 
-  failed = (name: string, error: Error) => {
-    this.setState(state => {
-      let dataStorage = state[DATA_LOADER_NAMESPACE][name]
-      if (dataStorage) {
-        dataStorage = {
-          ...dataStorage,
-          error,
-          loading: false,
-          lastErrorTime: Date.now(),
-        }
-        return {
-          ...state,
-          [DATA_LOADER_NAMESPACE]: {
-            ...state[DATA_LOADER_NAMESPACE],
-            [name]: {
-              ...dataStorage,
-            }
-          }
-        }
-      }
-      return state
-    })
-  }
-
-  handleData = (data: any, name: string, meta: Meta, isFresh: boolean) => {
-    this.succeed(name, data, isFresh)
+  handleData = (data: any, name: string, key: string, meta: Meta, isFresh: boolean) => {
+    this.succeed(name, key, data, isFresh)
     if (meta.onSuccess) {
       meta.onSuccess(data)
     }
   }
 
-  fetchOnce = async (name: string, meta: Meta, timeout?: number) => {
-    let result = this.state[DATA_LOADER_NAMESPACE][name]
-    if (isDataValid(result, meta)) {
+  fetchOnce = async (meta: Meta) => {
+    const timeout = meta.interval
+    const name = meta.name
+    const key = meta.dataKey(meta.name, meta.params)
+
+    let result = this.state[DATA_LOADER_NAMESPACE][name] && this.state[DATA_LOADER_NAMESPACE][name][key]
+
+    if (result && isDataValid(result, meta)) {
       return result
     }
 
-    this.started(name)
+    this.started(name, key)
     try {
       if (meta.dataPersister) {
         result = meta.dataPersister.getItem(name, meta)
       }
 
       if (result && meta.lazyLoad) {
-        this.handleData(result, name, meta, false)
+        this.handleData(result, name, key, meta, false)
       }
 
       if (timeout) {
@@ -130,13 +137,13 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
         result = await meta.apiCall(meta.params)
       }
 
-      this.handleData(result, name, meta, true)
+      this.handleData(result, name, key, meta, true)
       if (meta.dataPersister) {
         meta.dataPersister.setItem(name, result)
       }
 
     } catch (e) {
-      this.failed(name, e)
+      this.failed(name, key, e)
       if (meta.onFailure) {
         meta.onFailure(e)
       }
@@ -144,50 +151,42 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
     return result
   }
 
-  fetchInterval = async (name: string, meta: Meta) => {
+  fetchInterval = async (meta: Meta) => {
     // give fetchOnce a third argument to enable timeout
     // this makes sure the fetchInterval function to be executed in interval
     const data = await all({
       timeout: delay(meta.interval as number),
-      result: this.fetchOnce(name, meta, meta.interval),
+      result: this.fetchOnce(meta),
     });
 
     if (meta.shouldInterval && meta.shouldInterval(data.result)) {
-      await this.fetchInterval(name, meta)
+      await this.fetchInterval(meta)
     }
   }
 
-  load = (name: string, meta: Meta) => {
+  load = (meta: Meta) => {
     if (meta.interval) {
-      this.fetchInterval(name, meta)
+      this.fetchInterval(meta)
     } else {
-      this.fetchOnce(name, meta)
+      this.fetchOnce(meta)
     }
   }
 
-  init = (name: string) => {
-    this.setState(state => ({
-      ...state,
-      [DATA_LOADER_NAMESPACE]: {
-        ...state[DATA_LOADER_NAMESPACE],
-        [name]: {
-          data: null,
-          loading: false,
-          error: null,
-        }
-      }
-    }))
+  init = (meta: Meta) => {
+    this.update(meta.name, meta.dataKey(name, meta.params), {
+      data: null,
+      loading: false,
+      error: null,
+    })
   }
 
   state: DataProviderState = {
     [DATA_LOADER_NAMESPACE]: {},
-    load: this.load,
-    init: this.init,
   }
 
   render() {
     return (
-      <DataLoaderContext.Provider value={this.state}>
+      <DataLoaderContext.Provider value={{ ...this.state, load: this.load, init: this.init }}>
         {this.props.children}
       </DataLoaderContext.Provider>
     )
