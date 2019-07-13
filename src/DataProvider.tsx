@@ -173,7 +173,7 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
   }
 
   init = (meta: Meta) => {
-    this.update(meta.name, meta.dataKey(name, meta.params), {
+    this.update(meta.name, meta.dataKey(meta.name, meta.params), {
       data: null,
       loading: false,
       error: null,

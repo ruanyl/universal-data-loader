@@ -99,7 +99,7 @@ export const App = () => {
       </DataLoader>
 
       <h3>Example 4: with localStorage</h3>
-      <DataLoader name="api4" apiCall={mockApi} dataPersister={LocalStorageDataPersister()} lazyLoad={true}>
+      <DataLoader name="api4-context" apiCall={mockApi} dataPersister={LocalStorageDataPersister()} lazyLoad={true}>
       {
         (loader: Loader<number>) => {
           if (loader.error) {

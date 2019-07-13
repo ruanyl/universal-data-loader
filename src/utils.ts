@@ -9,6 +9,8 @@ export type All<T> = {
   [P in keyof T]: any;
 }
 
+export const defaultDataKeyFunc = (name: string, _?: any) => `${name}/default`
+
 export const isDataValid = (data: LoaderStatus, meta: Meta): boolean => {
   const cacheExpiresIn = meta.cacheExpiresIn ? meta.cacheExpiresIn : 0
   if (data && (Date.now() - data.lastUpdateTime!) < cacheExpiresIn) {

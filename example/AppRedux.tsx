@@ -100,7 +100,7 @@ export class App extends React.PureComponent<any, any> {
         <hr/>
 
         <h3>Example 4: with localStorage</h3>
-        <DataLoader name="api4" apiCall={mockApi} dataPersister={LocalStorageDataPersister()} lazyLoad={true}>
+        <DataLoader name="api4-redux" apiCall={mockApi} dataPersister={LocalStorageDataPersister()} lazyLoad={true}>
         {
           (loader: Loader<number>) => {
             if (loader.error) {

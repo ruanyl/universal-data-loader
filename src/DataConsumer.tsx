@@ -2,8 +2,7 @@ import * as React from 'react'
 import { DataLoaderContext, ContextType, DataFunc, DataShape } from './DataProvider'
 import { DataLoaderComponent, DataLoaderProps } from './DataLoader'
 import { DATA_LOADER_NAMESPACE, LoaderStatus } from './DataLoaderState'
-
-export const defaultDataKeyFunc = () => 'default'
+import { defaultDataKeyFunc } from './utils';
 
 export class DataConsumer<TData = any, TParams = any> extends React.PureComponent<DataLoaderProps<TData, TParams>, {}> {
   render() {
@@ -11,6 +10,7 @@ export class DataConsumer<TData = any, TParams = any> extends React.PureComponen
     return (
       <DataLoaderContext.Consumer>
         {(state: ContextType) => {
+          console.log(props)
           const dataKey = props.dataKey || defaultDataKeyFunc
           const key = dataKey(props.name, props.params)
 
