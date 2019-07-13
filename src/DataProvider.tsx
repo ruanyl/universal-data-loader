@@ -116,7 +116,7 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
     this.started(name, key)
     try {
       if (meta.dataPersister) {
-        result = meta.dataPersister.getItem(name, meta)
+        result = meta.dataPersister.getItem(key, meta)
       }
 
       if (result && meta.lazyLoad) {
@@ -139,7 +139,7 @@ export class DataProvider extends React.PureComponent<{}, DataProviderState> {
 
       this.handleData(result, name, key, meta, true)
       if (meta.dataPersister) {
-        meta.dataPersister.setItem(name, result)
+        meta.dataPersister.setItem(key, result)
       }
 
     } catch (e) {
